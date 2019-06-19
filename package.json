@@ -1,0 +1,14 @@
+{
+    "name": "audio2json",
+    "version": "0.0.1",
+    "scripts": {
+        "start": "node app.js"
+    },
+    "dependencies": {
+        "watson-developer-cloud": "^3.13.0"
+    },
+    "repository": {},
+    "engines": {
+        "node": "6.x"
+    }
+}
