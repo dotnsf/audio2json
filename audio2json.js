@@ -20,29 +20,38 @@ var model = ( settings.model ? settings.model : 'ja-JP_BroadbandModel' );
 
 function processSingleFile(){
   if( idx < filenames.length ){
-    var filepath = './audio/' + filenames[idx];
-    console.log( 'file: ' + filepath );
+    if( filenames[idx] != '.gitkeep' ){
+      var filepath = './audio/' + filenames[idx];
+      console.log( 'file: ' + filepath );
 
-    var tmp = filepath.split( '.' );
-    var ext = tmp[tmp.length-1];
+      var tmp = filepath.split( '.' );
+      var ext = tmp[tmp.length-1];
 
-    var params = {
-      objectMode: true,
-      content_type: 'audio/' + ext,
-      model: model,
-      //max_alternatives: 3,
-      timestamps: true
-    };
-    if( settings.max_alternatives ){
-      params.max_alternatives = settings.max_alternatives;
+      var params = {
+        audio: fs.createReadStream( filepath ),
+        content_type: 'audio/' + ext,
+        model: model,
+        //max_alternatives: 3,
+        timestamps: true
+      };
+      if( settings.max_alternatives ){
+        params.max_alternatives = settings.max_alternatives;
+      }
+
+      speech_to_text.recognize( params, function( error, result ){
+        if( error ){
+          console.log( JSON.stringify( error, null, 2 ) );
+          onError( JSON.stringify( error, null, 2 ) );
+          onClose( null );
+        }else{
+          console.log( JSON.stringify( result, null, 2 ) );
+          onData( result );
+          onClose( null );
+        }
+      });
+    }else{
+      onClose( null );
     }
-
-    var recognizeStream = speech_to_text.recognizeUsingWebSocket( params );
-    fs.createReadStream( filepath ).pipe( recognizeStream );
-
-    recognizeStream.on( 'data', function( evt ){ onData( evt ); } );
-    recognizeStream.on( 'error', function( evt ){ onError( evt ); } );
-    recognizeStream.on( 'close', function( evt ){ onClose( evt ); } );
   }else{
     console.log( 'done.' );
   }
